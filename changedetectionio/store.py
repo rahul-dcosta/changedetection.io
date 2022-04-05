@@ -445,7 +445,8 @@ class ChangeDetectionStore:
 
         for uuid, watch in self.data['watching'].items():
             if 'minutes_between_check' in watch:
-                if watch['minutes_between_check'] is not None:
-                    watch['time_between_check']['seconds'] = watch['minutes_between_check'] * 60
-                del (watch['minutes_between_check'])
+                # Only upgrade individual watch time if it was set
+                if watch.get('minutes_between_check', False):
+                    self.data['watching'][uuid]['time_between_check']['seconds'] = watch['minutes_between_check'] * 60
+                del (self.data['watching'][uuid]['minutes_between_check'])
 

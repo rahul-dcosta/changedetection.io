@@ -530,28 +530,29 @@ def changedetection_app(config=None, datastore_o=None):
     def edit_page(uuid):
         from changedetectionio import forms
 
-        form = forms.watchForm(formdata=request.form if request.method == 'POST' else None,
-                                        data=datastore.data['watching'][uuid]
-                                        )
 
         # More for testing, possible to return the first/only
         if uuid == 'first':
             uuid = list(datastore.data['watching'].keys()).pop()
 
+        if not uuid in datastore.data['watching']:
+            flash("No watch with the UUID %s found." % (uuid), "error")
+            return redirect(url_for('index'))
+
+        form = forms.watchForm(formdata=request.form if request.method == 'POST' else None,
+                                        data=datastore.data['watching'][uuid]
+                                        )
+
         if request.method == 'GET':
-            if not uuid in datastore.data['watching']:
-                flash("No watch with the UUID %s found." % (uuid), "error")
-                return redirect(url_for('index'))
-
-
             if datastore.data['watching'][uuid]['fetch_backend'] is None:
                 form.fetch_backend.data = datastore.data['settings']['application']['fetch_backend']
 
         if request.method == 'POST' and form.validate():
 
             # Re #110, if they submit the same as the default value, set it to None, so we continue to follow the default
-#            if form.seconds_between_check.data == datastore.data['settings']['requests']['seconds_between_check']:
-#                form.seconds_between_check.data = None
+            x = datastore.data['settings']['requests']['time_between_check']
+            if form.time_between_check.data == datastore.data['settings']['requests']['time_between_check']:
+                form.seconds_between_check.data = None
 
             if form.fetch_backend.data == datastore.data['settings']['application']['fetch_backend']:
                 form.fetch_backend.data = None
@@ -599,19 +600,17 @@ def changedetection_app(config=None, datastore_o=None):
 
         else:
             if request.method == 'POST' and not form.validate():
+                for fieldName, errorMessages in form.errors.items():
+                    for err in errorMessages:
+                        x=1
                 flash("An error occurred, please see below.", "error")
 
-            # Re #110 offer the default minutes
-            using_default_minutes = False
-#            if form.seconds_between_check.data == None:
-#                form.seconds_between_check.data = datastore.data['settings']['requests']['seconds_between_check']
-#                using_default_minutes = True
-
+            has_empty_checktime = datastore.data['watching'][uuid].has_empty_checktime
             output = render_template("edit.html",
                                      uuid=uuid,
                                      watch=datastore.data['watching'][uuid],
                                      form=form,
-                                     using_default_minutes=using_default_minutes,
+                                     has_empty_checktime=has_empty_checktime,
                                      current_base_url=datastore.data['settings']['application']['base_url']
                                      )
 
@@ -624,7 +623,7 @@ def changedetection_app(config=None, datastore_o=None):
 
         # Don't use form.data on POST so that it doesnt overrid the checkbox status from the POST status
         form = forms.globalSettingsForm(formdata=request.form if request.method == 'POST' else None,
-                                        data=datastore.data['settings']['application']
+                                        data=datastore.data['settings']
                                         )
 
         if request.method == 'POST':
@@ -650,6 +649,12 @@ def changedetection_app(config=None, datastore_o=None):
 
             else:
                 flash("An error occurred, please see below.", "error")
+                for fieldName, errorMessages in form.errors.items():
+                    for err in errorMessages:
+                        flash(fieldName,err)
+                        x=err
+                        y=1
+
 
         output = render_template("settings.html",
                                  form=form,
@@ -1183,12 +1188,11 @@ def ticker_thread_check_time_launch_checks():
                 continue
 
             # If they supplied an individual entry minutes to threshold.
-            watch_seconds_between_check = watch.total_seconds
-            if watch_seconds_between_check:
-                max_time = watch_seconds_between_check
-            else:
+            if watch.has_empty_checktime:
                 # Default system wide.
                 max_time = max_system_wide
+            else:
+                max_time = watch.total_seconds
 
             threshold = now - max_time
 

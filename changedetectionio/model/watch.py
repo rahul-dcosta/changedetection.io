@@ -44,8 +44,16 @@ class Watch(dict):
             'extract_title_as_title': False,
             # Re #110, so then if this is set to None, we know to use the default value instead
             # Requires setting to None on submit if it's the same as the default
-            'time_between_check': {'weeks': None, 'days': None, 'hours': None, 'minutes': None, 'seconds': minimum_seconds_recheck_time}
+            # Should be all None by default, so we use the system default in this case.
+            'time_between_check': {'weeks': None, 'days': None, 'hours': None, 'minutes': None, 'seconds': None}
         })
+
+    @property
+    def has_empty_checktime(self):
+        # using all() + dictionary comprehension
+        # Check if all values are 0 in dictionary
+        res = all(x == None or x == False or x==0 for x in self.get('time_between_check', {}).values())
+        return res
 
     @property
     def total_seconds(self):

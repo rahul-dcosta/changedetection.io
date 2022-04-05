@@ -304,11 +304,11 @@ class ValidateCSSJSONXPATHInput(object):
 
 
 class TimeBetweenCheckForm(Form):
-    weeks = IntegerField('Weeks', validators=[validators.Optional()])
-    days = IntegerField('Days', validators=[validators.Optional()])
-    hours = IntegerField('Hours', validators=[validators.Optional()])
-    minutes = IntegerField('Minutes', validators=[validators.Optional()])
-    seconds = IntegerField('Seconds', validators=[validators.Optional()])
+    weeks = IntegerField('Weeks', validators=[validators.Optional(), validators.NumberRange(min=0, message="Should contain zero or more seconds")])
+    days = IntegerField('Days', validators=[validators.Optional(), validators.NumberRange(min=0, message="Should contain zero or more seconds")])
+    hours = IntegerField('Hours', validators=[validators.Optional(), validators.NumberRange(min=0, message="Should contain zero or more seconds")])
+    minutes = IntegerField('Minutes', validators=[validators.Optional(), validators.NumberRange(min=0, message="Should contain zero or more seconds")])
+    seconds = IntegerField('Seconds', validators=[validators.Optional(), validators.NumberRange(min=0, message="Should contain zero or more seconds")])
     # @todo add total seconds minimum validatior = minimum_seconds_recheck_time
 
 
@@ -328,6 +328,18 @@ class commonSettingsForm(Form):
     fetch_backend = RadioField(u'Fetch Method', choices=content_fetcher.available_fetchers(), validators=[ValidateContentFetcherIsReady()])
     extract_title_as_title = BooleanField('Extract <title> from document and use as watch title', default=False)
     time_between_check = FormField(TimeBetweenCheckForm)
+
+    def validate(self, **kwargs):
+        if not super().validate():
+            return False
+
+        result = True
+
+        # Check that atleast the applications configured minimum time is set
+        #is_null_time_set = all(x == None or x == False or x == 0 for x in self.time_between_check.data.values())
+        #if not is_null_time_set:
+
+        return result
 
 class watchForm(commonSettingsForm):
 
@@ -362,9 +374,21 @@ class watchForm(commonSettingsForm):
 
         return result
 
-class globalSettingsForm(commonSettingsForm):
-    password = SaltyPasswordField()
+# Needs to be the same struct
+class globalSettingsRequestForm(Form):
+    time_between_check = FormField(TimeBetweenCheckForm)
 
+
+class globalSettingsApplicationForm(Form):
+    notification_urls = StringListField('Notification URL List',
+                                        validators=[validators.Optional(), ValidateNotificationBodyAndTitleWhenURLisSet(),
+                                                    ValidateAppRiseServers()])
+    notification_title = StringField('Notification Title', default=default_notification_title,
+                                     validators=[validators.Optional(), ValidateTokensList()])
+    notification_body = TextAreaField('Notification Body', default=default_notification_body,
+                                      validators=[validators.Optional(), ValidateTokensList()])
+    notification_format = SelectField('Notification Format', choices=valid_notification_formats.keys(), default=default_notification_format)
+    extract_title_as_title = BooleanField('Extract <title> from document and use as watch title', default=False)
     base_url = StringField('Base URL', validators=[validators.Optional()])
     global_subtractive_selectors = StringListField('Remove elements', [ValidateCSSJSONXPATHInput(allow_xpath=False, allow_json=False)])
     global_ignore_text = StringListField('Ignore Text', [ValidateListRegex()])
@@ -372,5 +396,10 @@ class globalSettingsForm(commonSettingsForm):
     real_browser_save_screenshot = BooleanField('Save last screenshot when using Chrome?')
     removepassword_button = SubmitField('Remove password', render_kw={"class": "pure-button pure-button-primary"})
     fetch_backend = RadioField('Fetch Method', choices=content_fetcher.available_fetchers(), validators=[ValidateContentFetcherIsReady()])
-    time_between_check = FormField(TimeBetweenCheckForm)
+    password = SaltyPasswordField()
+
+class globalSettingsForm(commonSettingsForm):
+
+    requests = FormField(globalSettingsRequestForm)
+    application = FormField(globalSettingsApplicationForm)
     save_button = SubmitField('Save', render_kw={"class": "pure-button pure-button-primary"})

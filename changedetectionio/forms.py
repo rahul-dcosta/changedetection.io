@@ -327,12 +327,12 @@ class commonSettingsForm(Form):
     notification_format = SelectField('Notification Format', choices=valid_notification_formats.keys(), default=default_notification_format)
     fetch_backend = RadioField(u'Fetch Method', choices=content_fetcher.available_fetchers(), validators=[ValidateContentFetcherIsReady()])
     extract_title_as_title = BooleanField('Extract <title> from document and use as watch title', default=False)
+    time_between_check = FormField(TimeBetweenCheckForm)
 
 class watchForm(commonSettingsForm):
 
     url = html5.URLField('URL', validators=[validateURL()])
     tag = StringField('Group tag', [validators.Optional(), validators.Length(max=35)])
-    time_between_check = FormField(TimeBetweenCheckForm)
 
     css_filter = StringField('CSS/JSON/XPATH Filter', [ValidateCSSJSONXPATHInput()])
     subtractive_selectors = StringListField('Remove elements', [ValidateCSSJSONXPATHInput(allow_xpath=False, allow_json=False)])

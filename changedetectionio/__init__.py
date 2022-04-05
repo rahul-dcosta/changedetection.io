@@ -651,11 +651,6 @@ def changedetection_app(config=None, datastore_o=None):
             else:
                 flash("An error occurred, please see below.", "error")
 
-        else:
-            form = forms.globalSettingsForm(
-                                            data=datastore.data['settings']['application']
-                                            )
-
         output = render_template("settings.html",
                                  form=form,
                                  current_base_url = datastore.data['settings']['application']['base_url'],

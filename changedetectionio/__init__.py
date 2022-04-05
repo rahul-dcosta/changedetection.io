@@ -552,7 +552,7 @@ def changedetection_app(config=None, datastore_o=None):
             # Re #110, if they submit the same as the default value, set it to None, so we continue to follow the default
             x = datastore.data['settings']['requests']['time_between_check']
             if form.time_between_check.data == datastore.data['settings']['requests']['time_between_check']:
-                form.seconds_between_check.data = None
+                form.time_between_check.data = {'seconds': 0 }
 
             if form.fetch_backend.data == datastore.data['settings']['application']['fetch_backend']:
                 form.fetch_backend.data = None

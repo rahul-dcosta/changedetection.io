@@ -21,7 +21,7 @@ def test_check_watch_field_storage(client, live_server):
     res = client.post(
         url_for("edit_page", uuid="first"),
         data={ "notification_urls": "json://myapi.com",
-               "seconds_between_check": 126,
+               "time_between_check": {'seconds': 126 },
                "css_filter" : ".fooclass",
                "title" : "My title",
                "ignore_text" : "ignore this",
@@ -56,7 +56,7 @@ def test_check_recheck_global_setting(client, live_server):
     res = client.post(
         url_for("settings_page"),
         data={
-               "seconds_between_check": 1566,
+               "time_between_check": {'seconds': 1566 },
                'fetch_backend': "html_requests"
                },
         follow_redirects=True
@@ -88,7 +88,7 @@ def test_check_recheck_global_setting(client, live_server):
     res = client.post(
         url_for("settings_page"),
         data={
-               "seconds_between_check": 222,
+               "time_between_check": {'seconds': 222 },
                 'fetch_backend': "html_requests"
                },
         follow_redirects=True
@@ -108,7 +108,7 @@ def test_check_recheck_global_setting(client, live_server):
     res = client.post(
         url_for("edit_page", uuid="first"),
         data={"url": test_url,
-              "seconds_between_check": 55,
+              "time_between_check": {'seconds': 55 },
               'fetch_backend': "html_requests"
               },
         follow_redirects=True
@@ -124,7 +124,7 @@ def test_check_recheck_global_setting(client, live_server):
     res = client.post(
         url_for("settings_page"),
         data={
-               "seconds_between_check": 666,
+               "time_between_check": {'seconds': 666 },
                 'fetch_backend': "html_requests"
                },
         follow_redirects=True
@@ -134,7 +134,7 @@ def test_check_recheck_global_setting(client, live_server):
     res = client.post(
         url_for("edit_page", uuid="first"),
         data={"url": test_url,
-              "seconds_between_check": "",
+              "time_between_check": {'seconds': '' },
               'fetch_backend': "html_requests"
               },
         follow_redirects=True

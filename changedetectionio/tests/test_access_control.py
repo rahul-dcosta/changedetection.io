@@ -46,7 +46,7 @@ def test_check_access_control(app, client):
         assert b"BACKUP" in res.data
         assert b"IMPORT" in res.data
         assert b"LOG OUT" in res.data
-        assert b"seconds_between_check" in res.data
+        assert b"time_between_check" in res.data
         assert b"fetch_backend" in res.data
 
         res = c.post(

@@ -418,6 +418,9 @@ def changedetection_app(config=None, datastore_o=None):
         apobj = apprise.Apprise()
 
         # validate URLS
+        if not len(request.form['notification_urls'].strip()):
+            return make_response({'error': 'No Notification URLs set'}, 400)
+
         for server_url in request.form['notification_urls'].splitlines():
             if not apobj.add(server_url):
                 message = '{} is not a valid AppRise URL.'.format(server_url)
@@ -1005,10 +1008,14 @@ def changedetection_app(config=None, datastore_o=None):
             flash("Error")
             return redirect(url_for('index'))
 
+
     @app.route("/api/delete", methods=['GET'])
     @login_required
     def api_delete():
         uuid = request.args.get('uuid')
+        # More for testing, possible to return the first/only
+        if uuid == 'first':
+            uuid = list(datastore.data['watching'].keys()).pop()
         datastore.delete(uuid)
         flash('Deleted.')
 

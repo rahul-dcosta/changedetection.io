@@ -398,7 +398,7 @@ class globalSettingsApplicationForm(Form):
     fetch_backend = RadioField('Fetch Method', choices=content_fetcher.available_fetchers(), validators=[ValidateContentFetcherIsReady()])
     password = SaltyPasswordField()
 
-class globalSettingsForm(commonSettingsForm):
+class globalSettingsForm(Form):
 
     requests = FormField(globalSettingsRequestForm)
     application = FormField(globalSettingsApplicationForm)

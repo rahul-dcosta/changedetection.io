@@ -628,7 +628,7 @@ def changedetection_app(config=None, datastore_o=None):
 
         if request.method == 'POST':
             # Password unset is a GET, but we can lock the session to a salted env password to always need the password
-            if form.data.get('removepassword_button', False) == True and not os.getenv("SALTED_PASS", False):
+            if form.application.form.data.get('removepassword_button', False) == True and not os.getenv("SALTED_PASS", False):
                 datastore.data['settings']['application']['password'] = False
                 flash("Password protection removed.", 'notice')
                 flask_login.logout_user()
@@ -638,8 +638,8 @@ def changedetection_app(config=None, datastore_o=None):
                 datastore.data['settings']['application'].update(form.data)
                 datastore.needs_write = True
 
-                if not os.getenv("SALTED_PASS", False) and len(form.password.encrypted_password):
-                    datastore.data['settings']['application']['password'] = form.password.encrypted_password
+                if not os.getenv("SALTED_PASS", False) and len(form.application.form.password.encrypted_password):
+                    datastore.data['settings']['application']['password'] = form.application.form.password.encrypted_password
                     datastore.needs_write = True
                     flash("Password protection enabled.", 'notice')
                     flask_login.logout_user()

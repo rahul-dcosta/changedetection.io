@@ -12,9 +12,9 @@ def test_check_access_control(app, client):
         # Enable password check.
         res = c.post(
             url_for("settings_page"),
-            data={"password": "foobar",
-                  "time_between_check": {'seconds':180},
-                  'fetch_backend': "html_requests"},
+            data={"application-password": "foobar",
+                  "requests-time_between_check-seconds": 180,
+                  'fetch_backend': "application-fetch_backend"},
             follow_redirects=True
         )
 
